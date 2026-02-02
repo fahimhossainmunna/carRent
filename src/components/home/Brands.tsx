@@ -7,6 +7,9 @@ const Brands = () => {
     { name: "Ferrari", src: "/images/brands/ferrari.png" },
     { name: "Ford", src: "/images/brands/ford.png" },
     { name: "Toyota", src: "/images/brands/toyota.png" },
+    { name: "Honda", src: "/images/brands/honda.png" },
+    { name: "Lamborghini", src: "/images/brands/Lamborghini.png" },
+    { name: "Mercedes", src: "/images/brands/Mercedes.png" },
   ];
 
   return (
