@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react"; 
 import { useSearchParams, useRouter } from "next/navigation";
-import { Search, SlidersHorizontal, LayoutGrid, List } from "lucide-react";
+import { Search, SlidersHorizontal } from "lucide-react";
 import Image from "next/image";
-
 
 const carData = [
   { id: 1, name: "BMW M4 Competition", brand: "BMW", price: 250, image: "/images/cars/bmw1.png" },
@@ -17,7 +16,7 @@ const carData = [
   { id: 8, name: "Ford Mustang GT", brand: "Ford", price: 190, image: "/images/cars/ford1.png" },
 ];
 
-const CarsListingPage = () => {
+const CarsListingContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -46,7 +45,7 @@ const CarsListingPage = () => {
       <div className="container mx-auto px-6 py-12">
         <div className="flex flex-col lg:flex-row gap-10">
           
-          {/* Left Sidebar */}
+          {/* Sidebar Filter */}
           <aside className="w-full lg:w-[320px] shrink-0">
             <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm sticky top-24">
               <div className="flex items-center justify-between mb-8">
@@ -59,7 +58,7 @@ const CarsListingPage = () => {
                 >Reset</button>
               </div>
 
-              <div className="space-y-4 mb-10">
+              <div className="space-y-4">
                 <p className="text-sm font-bold uppercase tracking-widest text-gray-400">Select Brand</p>
                 <div className="grid grid-cols-1 gap-3">
                   {['Toyota', 'BMW', 'Audi', 'Ford', 'Ferrari'].map((brand) => (
@@ -69,7 +68,7 @@ const CarsListingPage = () => {
                         name="brand"
                         checked={selectedBrand === brand}
                         onChange={() => setSelectedBrand(brand)}
-                        className="w-5 h-5 border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" 
+                        className="w-5 h-5 border-gray-300 text-blue-600 cursor-pointer" 
                       />
                       <span className={`font-semibold transition ${selectedBrand === brand ? 'text-blue-600' : 'text-gray-600'}`}>
                         {brand}
@@ -81,7 +80,7 @@ const CarsListingPage = () => {
             </div>
           </aside>
 
-          {/* Right Content */}
+          {/* Right Content Section */}
           <div className="flex-1 space-y-8">
             <div className="relative group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -103,7 +102,7 @@ const CarsListingPage = () => {
                   <h3 className="text-xl font-bold font-[family-name:var(--font-montserrat)] px-2">{car.name}</h3>
                   <div className="flex justify-between items-center mt-4 px-2">
                     <p className="text-blue-600 font-black text-xl">${car.price} <span className="text-gray-400 text-sm font-medium">/ day</span></p>
-                    <button className="bg-gray-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-600 transition">Details</button>
+                    <button className="bg-gray-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition">Details</button>
                   </div>
                 </div>
               ))}
@@ -116,4 +115,14 @@ const CarsListingPage = () => {
   );
 };
 
-export default CarsListingPage;
+export default function CarsListingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xl font-bold text-blue-600 animate-pulse">Loading Cars...</p>
+      </div>
+    }>
+      <CarsListingContent />
+    </Suspense>
+  );
+}
