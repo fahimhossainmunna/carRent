@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff; /* Purata white background */
+  --foreground: #111827; /* Dark text jeno pora jay */
+  --primary: #2563eb;    /* Royal Blue - Car rental-er jonno best */
+  --secondary: #6b7280;  /* Muted gray text-er jonno */
+}
+
+/* Dark mode-er jhamela muche deyar jonno */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #ffffff; 
+    --foreground: #111827;
+  }
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), sans-serif; /* Ager set kora font */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Container-er padding thik rakhar jonno */
+.container {
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
