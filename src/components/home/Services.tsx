@@ -33,7 +33,6 @@ const Services = () => {
 
   return (
     <section className="relative py-24 overflow-hidden" style={{ background: "linear-gradient(135deg, #111827 0%, #1b2032 50%, #141b2d 100%)" }}>
-      {/* Subtle ambient glows */}
       <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-10 pointer-events-none" style={{ background: "#f59e0b" }} />
       <div className="absolute bottom-0 right-1/4 w-80 h-80 rounded-full blur-3xl opacity-10 pointer-events-none" style={{ background: "#f97316" }} />
 

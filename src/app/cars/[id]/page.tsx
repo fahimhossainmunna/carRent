@@ -182,8 +182,6 @@ export default function CarDetailsPage({
             </button>
           </div>
         </div>
-
-        {/* --- 4. Recommendation Car Slider --- */}
         {/* --- 4. Recommendation Car Slider --- */}
 <div className="mt-24 space-y-10 w-full max-w-[1320px] mx-auto overflow-hidden">
   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end px-4 gap-6">
@@ -211,7 +209,7 @@ export default function CarDetailsPage({
     </div>
   </div>
 
-  {/* Fixed Slider Container - Responsiveness Fix */}
+  {/* Slider Container */}
   <div
     id="recommendation-slider"
     className="flex gap-10 overflow-x-auto snap-x snap-mandatory px-4 pb-12 scroll-smooth no-scrollbar"

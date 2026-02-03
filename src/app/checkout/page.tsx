@@ -9,10 +9,9 @@ import Image from "next/image";
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [isSuccess, setIsSuccess] = useState(false); // Success Modal State
+  const [isSuccess, setIsSuccess] = useState(false); 
   
   const carId = searchParams.get("id");
-  // URL er ID onujayi data load
   const car = carData.find((item) => item.id === Number(carId)) || carData[0];
 
   return (

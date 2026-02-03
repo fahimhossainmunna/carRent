@@ -47,9 +47,9 @@ const FeaturedCars = () => {
                 </div>
               </div>
 
-              {/* Content Wrapper with flex-grow to push button down */}
+                 {/* =========== */}
               <div className="flex flex-col flex-grow space-y-6">
-                <div className="flex justify-between items-start min-h-[60px]"> {/* Fixed height for Title area */}
+                <div className="flex justify-between items-start min-h-[60px]"> 
                   <div>
                     <h4 className="text-xl font-black text-slate-900 uppercase tracking-tighter line-clamp-2">
                       {car.name}
