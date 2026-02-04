@@ -117,7 +117,7 @@ const BookingCard = ({
   >
     <div className="flex flex-col lg:flex-row gap-6">
       {/* Car Image */}
-      <div className="h-32 w-full lg:w-48 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl relative overflow-hidden flex items-center justify-center shrink-0 shadow-lg shadow-amber-600/20 group-hover:shadow-amber-600/40 transition-shadow">
+      <div className="h-32 w-full lg:w-48 bg-gradient-to-br from-amber-50 to-slate-400 rounded-xl relative overflow-hidden flex items-center justify-center shrink-0 shadow-lg shadow-amber-600/20 group-hover:shadow-amber-600/40 transition-shadow">
         <Image 
           src={booking.carImage} 
           alt={booking.carName} 
@@ -152,11 +152,7 @@ const BookingCard = ({
               <p className="text-sm font-black text-gray-900 leading-tight">{booking.pickupLocation}</p>
               <p className="text-xs text-gray-500 font-semibold mt-1 flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
-                {new Date(booking.pickupDate).toLocaleDateString('en-US', { 
-                  month: 'short', 
-                  day: 'numeric', 
-                  year: 'numeric' 
-                })}
+                {booking.pickupDate}
               </p>
             </div>
           </div>
@@ -170,11 +166,7 @@ const BookingCard = ({
               <p className="text-sm font-black text-gray-900 leading-tight">{booking.dropoffLocation}</p>
               <p className="text-xs text-gray-500 font-semibold mt-1 flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
-                {new Date(booking.dropoffDate).toLocaleDateString('en-US', { 
-                  month: 'short', 
-                  day: 'numeric', 
-                  year: 'numeric' 
-                })}
+                {booking.dropoffDate}
               </p>
             </div>
           </div>
@@ -204,19 +196,19 @@ export default function MyBookingPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [bookings, setBookings] = useState<Booking[]>([]);
 
-  // Load bookings from localStorage
+  // Load bookings
   const loadBookings = () => {
     const staticBookings: Booking[] = [
       {
-        id: "BK-2026-001",
+        id: "BK-9021",
         carName: "Audi R8 Spyder",
         carImage: "/images/cars/audi2.png",
         status: "active",
-        pickupDate: "2026-02-10",
-        dropoffDate: "2026-02-15",
+        pickupDate: "Tuesday, February 10, 2026",
+        dropoffDate: "Sunday, February 15, 2026",
         pickupLocation: "Dhaka International University",
         dropoffLocation: "Gulshan, Dhaka",
-        totalPrice: 450,
+        totalPrice: 1750,
         bookingDate: "2026-02-04",
         customerName: "Munna Hassan",
         customerPhone: "+880 123 456 789",
@@ -228,272 +220,165 @@ export default function MyBookingPage() {
     setBookings([...savedBookings, ...staticBookings]);
   };
 
-  useEffect(() => {
-    loadBookings();
-  }, []);
+  useEffect(() => { loadBookings(); }, []);
 
-  // Remove booking
   const handleRemoveBooking = (id: string) => {
     const savedBookings = JSON.parse(localStorage.getItem("confirmedBookings") || "[]");
-    const updatedBookings = savedBookings.filter((b: Booking) => b.id !== id);
-    
-    localStorage.setItem("confirmedBookings", JSON.stringify(updatedBookings));
+    localStorage.setItem("confirmedBookings", JSON.stringify(savedBookings.filter((b: Booking) => b.id !== id)));
     loadBookings();
     setSelectedBooking(null);
   };
 
-  // Filter bookings
   const filteredBookings = bookings.filter((booking) => {
     const matchesStatus = filterStatus === "all" || booking.status === filterStatus;
-    const matchesSearch =
-      booking.carName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      booking.id.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = booking.carName.toLowerCase().includes(searchQuery.toLowerCase()) || booking.id.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesStatus && matchesSearch;
   });
 
-  // Calculate stats
-  const activeCount = bookings.filter(b => b.status === 'active' || b.status === 'confirmed').length;
-  const upcomingCount = bookings.filter(b => b.status === 'upcoming').length;
-  const completedCount = bookings.filter(b => b.status === 'completed').length;
-  const totalSpent = bookings.reduce((sum, b) => sum + b.totalPrice, 0);
+  const stats = {
+    active: bookings.filter(b => b.status === 'active' || b.status === 'confirmed').length,
+    upcoming: bookings.filter(b => b.status === 'upcoming').length,
+    completed: bookings.filter(b => b.status === 'completed').length,
+    totalSpent: bookings.reduce((sum, b) => sum + b.totalPrice, 0)
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-amber-50/20 to-gray-50 py-10">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-amber-50/20 to-gray-50 py-20">
       <div className="container mx-auto max-w-7xl px-4 md:px-6">
         
         {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-2 bg-gradient-to-r from-gray-900 to-amber-600 bg-clip-text text-transparent">
-            My Bookings
-          </h1>
-          <p className="text-gray-500 font-semibold text-lg">
-            Manage and track all your car rental bookings
-          </p>
+        <div className="mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+          <div>
+            <p className="text-xs font-black text-amber-500 uppercase tracking-[4px] mb-2">User Dashboard</p>
+            <h1 className="text-5xl font-black text-gray-900 tracking-tighter uppercase">
+              My <span className="text-amber-500">Bookings</span>
+            </h1>
+          </div>
+          <div className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4">
+            <div className="bg-amber-100 p-3 rounded-2xl"><Calendar className="h-6 w-6 text-amber-600" /></div>
+            <div>
+              <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Total Bookings</p>
+              <p className="text-xl font-black text-gray-900">{bookings.length} Vehicles</p>
+            </div>
+          </div>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <StatsCard 
-            icon={Car} 
-            value={activeCount} 
-            label="Active" 
-            bgColor="bg-green-100 text-green-600" 
-          />
-          <StatsCard 
-            icon={Clock} 
-            value={upcomingCount} 
-            label="Upcoming" 
-            bgColor="bg-amber-100 text-amber-600" 
-          />
-          <StatsCard 
-            icon={CheckCircle} 
-            value={completedCount} 
-            label="Completed" 
-            bgColor="bg-blue-100 text-blue-600" 
-          />
-          <StatsCard 
-            icon={CreditCard} 
-            value={`$${totalSpent}`} 
-            label="Total Spent" 
-            bgColor="bg-gray-100 text-gray-600" 
-          />
+          <StatsCard icon={Car} value={stats.active} label="Active" bgColor="bg-green-100 text-green-600" />
+          <StatsCard icon={Clock} value={stats.upcoming} label="Upcoming" bgColor="bg-amber-100 text-amber-600" />
+          <StatsCard icon={CheckCircle} value={stats.completed} label="Completed" bgColor="bg-blue-100 text-blue-600" />
+          <StatsCard icon={CreditCard} value={`$${stats.totalSpent}`} label="Total Spent" bgColor="bg-gray-100 text-gray-600" />
         </div>
 
         {/* Filters & Search */}
-        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm mb-6">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            {/* Search */}
+        <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="w-full md:w-96 relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
-                type="text"
-                placeholder="Search by car name or booking ID..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-gray-50 rounded-xl outline-none border-2 border-transparent focus:border-amber-500 focus:bg-white transition-all text-sm font-semibold placeholder:text-gray-400"
+                type="text" placeholder="Search by model or ID..."
+                value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-3.5 bg-gray-50 rounded-2xl outline-none border-2 border-transparent focus:border-amber-500 transition-all text-sm font-semibold"
               />
             </div>
-
-            {/* Filter Buttons */}
-            <div className="flex gap-2 flex-wrap justify-center md:justify-end">
+            <div className="flex gap-2 flex-wrap">
               {FILTER_OPTIONS.map((status) => (
                 <button
-                  key={status}
-                  onClick={() => setFilterStatus(status)}
-                  className={`px-4 py-2 rounded-xl text-sm font-bold uppercase tracking-wider transition-all ${
-                    filterStatus === status
-                      ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/30 scale-105"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:scale-105"
-                  }`}
+                  key={status} onClick={() => setFilterStatus(status)}
+                  className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${filterStatus === status ? "bg-amber-500 text-white shadow-lg" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
                 >
                   {status}
                 </button>
               ))}
             </div>
-          </div>
         </div>
 
         {/* Bookings List */}
-        <div className="space-y-4">
+        <div className="space-y-6">
           {filteredBookings.length === 0 ? (
             <EmptyState />
           ) : (
             filteredBookings.map((booking) => (
-              <BookingCard 
-                key={booking.id} 
-                booking={booking} 
-                onClick={() => setSelectedBooking(booking)} 
-              />
+              <BookingCard key={booking.id} booking={booking} onClick={() => setSelectedBooking(booking)} />
             ))
           )}
         </div>
       </div>
 
-      {/* Booking Details Modal */}
+      {/* --- MODAL FIX --- */}
       {selectedBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fadeIn">
-          <div 
-            className="absolute inset-0 bg-gray-900/70 backdrop-blur-md" 
-            onClick={() => setSelectedBooking(null)}
-          />
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-10 animate-fadeIn">
+          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-md" onClick={() => setSelectedBooking(null)} />
           
-          <div className="relative bg-white p-8 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-200 animate-scaleIn">
+          <div className="relative bg-white w-full max-w-3xl rounded-[40px] shadow-2xl animate-scaleIn overflow-hidden">
             {/* Modal Header */}
-            <div className="flex justify-between items-start mb-6 pb-6 border-b border-gray-100">
+            <div className="px-10 py-8 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10">
               <div>
-                <h2 className="text-3xl font-black bg-gradient-to-r from-gray-900 to-amber-600 bg-clip-text text-transparent mb-1">
-                  Booking Details
-                </h2>
-                <p className="text-sm text-gray-500 font-bold uppercase tracking-wider">
-                  {selectedBooking.id}
-                </p>
+                <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tighter">Booking Details</h2>
+                <p className="text-[10px] font-black text-amber-500 uppercase tracking-[3px] mt-1">{selectedBooking.id}</p>
               </div>
-              <button
-                onClick={() => setSelectedBooking(null)}
-                className="p-2 hover:bg-gray-100 rounded-xl transition-all group"
-              >
-                <X className="h-6 w-6 text-gray-500 group-hover:text-red-600 group-hover:rotate-90 transition-all" />
+              <button onClick={() => setSelectedBooking(null)} className="p-3 hover:bg-gray-100 rounded-2xl transition-all group">
+                <X className="h-7 w-7 text-gray-400 group-hover:rotate-90 transition-all" />
               </button>
             </div>
 
-            {/* Car Section */}
-            <div className="mb-6 p-5 bg-gradient-to-br from-amber-50 to-amber-50/30 rounded-2xl border border-amber-200">
-              <div className="flex items-center gap-5">
-                <div className="h-24 w-32 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl relative overflow-hidden flex items-center justify-center shrink-0 shadow-lg shadow-amber-600/30">
-                  <Image 
-                    src={selectedBooking.carImage} 
-                    alt={selectedBooking.carName} 
-                    fill 
-                    className="object-contain p-3" 
-                  />
+            {/* Scrollable Content */}
+            <div className="p-10 max-h-[65vh] overflow-y-auto no-scrollbar space-y-8">
+              
+              {/* Car Section */}
+              <div className="bg-gradient-to-br from-amber-50 to-amber-50/30 p-8 rounded-[35px] border border-amber-100 flex items-center gap-8 shadow-sm">
+                <div className="h-32 w-48 relative bg-white rounded-3xl shadow-md flex items-center justify-center overflow-hidden shrink-0">
+                  <Image src={selectedBooking.carImage} alt={selectedBooking.carName} fill className="object-contain p-4" />
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-2xl font-black text-gray-900 mb-2">
-                    {selectedBooking.carName}
-                  </h3>
+                <div>
+                  <h3 className="text-3xl font-black text-gray-900 uppercase tracking-tight mb-3 leading-none">{selectedBooking.carName}</h3>
                   <StatusBadge status={selectedBooking.status} />
                 </div>
               </div>
-            </div>
 
-            {/* Details Grid */}
-            <div className="space-y-4 mb-6">
-              {/* Customer Info */}
-              <div className="p-5 bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-100">
-                <h4 className="font-black text-gray-900 mb-4 flex items-center gap-2">
-                  <User className="h-5 w-5 text-amber-600" />
-                  Customer Information
-                </h4>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <User className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm font-bold text-gray-900">{selectedBooking.customerName}</span>
+              {/* Information Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-6 bg-slate-50 rounded-[30px] border border-gray-100 space-y-4">
+                  <h4 className="text-[10px] font-black text-amber-600 uppercase tracking-[2px] flex items-center gap-2"><User className="h-4 w-4" /> Customer Info</h4>
+                  <div className="space-y-1">
+                    <p className="text-lg font-black text-gray-900 uppercase">{selectedBooking.customerName}</p>
+                    <p className="text-sm text-gray-500 font-bold">{selectedBooking.customerPhone}</p>
+                    <p className="text-sm text-gray-500 font-bold">{selectedBooking.customerEmail}</p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm font-semibold text-gray-600">{selectedBooking.customerPhone}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Mail className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm font-semibold text-gray-600">{selectedBooking.customerEmail}</span>
+                </div>
+
+                <div className="p-6 bg-slate-50 rounded-[30px] border border-gray-100 space-y-4">
+                  <h4 className="text-[10px] font-black text-amber-600 uppercase tracking-[2px] flex items-center gap-2"><CreditCard className="h-4 w-4" /> Payment Info</h4>
+                  <div className="space-y-1">
+                    <p className="text-2xl font-black text-gray-900">${selectedBooking.totalPrice}.00</p>
+                    <p className="text-xs text-gray-400 font-black uppercase tracking-widest leading-none mt-2">Total Paid via Card</p>
                   </div>
                 </div>
               </div>
 
-              {/* Trip Details */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-5 bg-gradient-to-br from-amber-50 to-white rounded-2xl border border-amber-100">
-                  <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <Navigation className="h-4 w-4 text-amber-600" />
-                    Pick-up
-                  </p>
-                  <p className="text-sm font-black text-gray-900 mb-2">{selectedBooking.pickupLocation}</p>
-                  <p className="text-xs text-gray-500 font-semibold flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    {new Date(selectedBooking.pickupDate).toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                      month: 'long', 
-                      day: 'numeric', 
-                      year: 'numeric' 
-                    })}
-                  </p>
+              {/* Trip Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4">
+                <div className="p-6 bg-amber-50/20 rounded-[30px] border border-amber-100/50">
+                  <p className="text-[10px] font-black text-amber-500 uppercase tracking-[2px] mb-4 flex items-center gap-2"><Navigation className="h-4 w-4" /> Pick-up</p>
+                  <p className="text-base font-black text-gray-900 mb-2">{selectedBooking.pickupLocation}</p>
+                  <p className="text-xs font-bold text-gray-500">{selectedBooking.pickupDate}</p>
                 </div>
-
-                <div className="p-5 bg-gradient-to-br from-orange-50 to-white rounded-2xl border border-orange-100">
-                  <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-orange-600" />
-                    Drop-off
-                  </p>
-                  <p className="text-sm font-black text-gray-900 mb-2">{selectedBooking.dropoffLocation}</p>
-                  <p className="text-xs text-gray-500 font-semibold flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    {new Date(selectedBooking.dropoffDate).toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                      month: 'long', 
-                      day: 'numeric', 
-                      year: 'numeric' 
-                    })}
-                  </p>
-                </div>
-              </div>
-
-              {/* Payment Summary */}
-              <div className="p-5 bg-gradient-to-br from-green-50 to-white rounded-2xl border border-green-100">
-                <h4 className="font-black text-gray-900 mb-4 flex items-center gap-2">
-                  <CreditCard className="h-5 w-5 text-green-600" />
-                  Payment Summary
-                </h4>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600 font-semibold">Booking Date</span>
-                    <span className="text-sm font-bold text-gray-900">
-                      {new Date(selectedBooking.bookingDate).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="pt-3 border-t border-green-200 flex justify-between items-center">
-                    <span className="text-lg font-black text-gray-900">Total Amount</span>
-                    <span className="text-2xl font-black bg-gradient-to-r from-amber-500 to-amber-600 bg-clip-text text-transparent">
-                      ${selectedBooking.totalPrice}.00
-                    </span>
-                  </div>
+                <div className="p-6 bg-orange-50/20 rounded-[30px] border border-orange-100/50">
+                  <p className="text-[10px] font-black text-orange-500 uppercase tracking-[2px] mb-4 flex items-center gap-2"><MapPin className="h-4 w-4" /> Drop-off</p>
+                  <p className="text-base font-black text-gray-900 mb-2">{selectedBooking.dropoffLocation}</p>
+                  <p className="text-xs font-bold text-gray-500">{selectedBooking.dropoffDate}</p>
                 </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button className="flex-1 px-6 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-black hover:shadow-xl hover:shadow-amber-600/40 transition-all flex items-center justify-center gap-2 active:scale-95">
-                <Download className="h-5 w-5" />
-                Download Invoice
+            {/* Modal Footer */}
+            <div className="p-10 border-t border-gray-50 flex flex-col sm:flex-row gap-4 bg-white">
+              <button className="flex-1 bg-slate-900 text-white py-5 rounded-[22px] font-black uppercase text-xs tracking-[3px] hover:bg-amber-500 hover:text-slate-900 transition-all flex items-center justify-center gap-3 shadow-xl shadow-slate-900/10">
+                <Download className="h-5 w-5" /> Download Invoice
               </button>
-              
               {(selectedBooking.status === 'confirmed' || selectedBooking.status === 'active') && (
-                <button
-                  onClick={() => handleRemoveBooking(selectedBooking.id)}
-                  className="px-6 py-4 bg-red-100 text-red-600 rounded-xl font-black hover:bg-red-200 hover:shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95"
-                >
-                  <Trash2 className="h-5 w-5" />
-                  Remove Booking
+                <button onClick={() => handleRemoveBooking(selectedBooking.id)} className="bg-red-50 text-red-600 px-10 py-5 rounded-[22px] font-black uppercase text-xs tracking-[3px] hover:bg-red-600 hover:text-white transition-all flex items-center justify-center gap-3">
+                  <Trash2 className="h-5 w-5" /> Remove
                 </button>
               )}
             </div>
