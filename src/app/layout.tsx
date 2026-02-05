@@ -27,15 +27,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${inter.variable} ${montserrat.variable} antialiased`}
-      >
+      <body className={`${inter.variable} ${montserrat.variable} antialiased`}>
         <StoreProvider>
-
-        <Navbar/>
-        <main className="pt-15"></main>
-        {children}
-        <Footer/>
+          <Navbar />
+          <main className="pt-15"></main>
+          {children}
+          <Footer />
         </StoreProvider>
       </body>
     </html>

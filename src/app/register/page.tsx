@@ -59,7 +59,6 @@ export default function RegisterPage() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        // Rounded-3xl kora hoyeche jeno beshi round na lage
         className="w-full max-w-[550px] bg-white/80 backdrop-blur-xl p-10 md:p-12 rounded-[20px] border border-white/60 shadow-2xl shadow-slate-900/10 relative z-10"
       >
         {/* Header */}

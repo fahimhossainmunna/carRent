@@ -28,7 +28,6 @@ export const useCarFilters = () => {
     return matchesSearch && matchesBrand && matchesPrice;
   });
 
-  // Sidebar-er jonno reset function
   const resetFilters = () => {
     setSearchTerm("");
     setSelectedBrand("");
