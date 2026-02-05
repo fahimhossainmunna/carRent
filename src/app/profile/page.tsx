@@ -13,9 +13,8 @@ export default function ProfilePage() {
   const [bookingsCount, setBookingsCount] = useState(0);
 
   useEffect(() => {
-    // LocalStorage theke total bookings count kora holo
     const saved = JSON.parse(localStorage.getItem("confirmedBookings") || "[]");
-    setBookingsCount(saved.length + 1); // +1 for static booking
+    setBookingsCount(saved.length + 1);
   }, []);
 
   return (

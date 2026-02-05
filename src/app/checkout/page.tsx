@@ -14,15 +14,14 @@ function CheckoutContent() {
   const carId = searchParams.get("id");
   const car = carData.find((item) => item.id === Number(carId)) || carData[0];
 
-  // --- Logic for Saving Booking to LocalStorage ---
   const handleConfirmBooking = () => {
     const newBooking = {
-      // Unique ID generate kora holo
+    
       id: `BK-${Math.floor(Math.random() * 90000) + 10000}`,
       carName: car.name,
       carImage: car.image,
-      status: "confirmed", // My Bookings page-er status-er sathe match rakha holo
-      pickupDate: new Date().toISOString().split('T')[0], // Demo pickup date
+      status: "confirmed", 
+      pickupDate: new Date().toISOString().split('T')[0], 
       dropoffDate: "2026-02-15",
       pickupLocation: "Dhaka International University",
       dropoffLocation: "Gulshan, Dhaka",
@@ -33,11 +32,9 @@ function CheckoutContent() {
       customerEmail: "munna@example.com"
     };
 
-    // Age thaka bookings ana holo, tarpor notun-ta add kora holo
     const existingBookings = JSON.parse(localStorage.getItem("confirmedBookings") || "[]");
     localStorage.setItem("confirmedBookings", JSON.stringify([newBooking, ...existingBookings]));
     
-    // Success modal show kora holo
     setIsSuccess(true);
   };
 

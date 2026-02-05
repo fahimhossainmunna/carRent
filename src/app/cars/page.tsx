@@ -1,228 +1,211 @@
 "use client";
 
-import {
-  Fuel,
-  Gauge,
-  Phone,
-  Search,
-  SlidersHorizontal,
-  Users,
-  Star,
-} from "lucide-react";
+import { Search, SlidersHorizontal, Star, Zap, ShieldCheck, Compass } from "lucide-react";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense } from "react";
 import Link from "next/link";
-import { carData } from "@/data/cars";
+import { useCarFilters } from "@/hooks/useCarFilters";
 
 const BRANDS = ["Toyota", "BMW", "Audi", "Ford", "Ferrari", "Honda", "Lamborghini", "Mercedes"];
+const CATEGORIES = [
+  { name: "All", icon: <Compass className="h-4 w-4" /> },
+  { name: "SUV", icon: <ShieldCheck className="h-4 w-4" /> },
+  { name: "Luxury", icon: <Star className="h-4 w-4" /> },
+  { name: "Sport", icon: <Zap className="h-4 w-4" /> }
+];
 
 const CarsListingContent = () => {
-  const searchParams = useSearchParams();
-  const router = useRouter();
+  const {
+    searchTerm, setSearchTerm,
+    selectedBrand, setSelectedBrand,
+    priceRange, setPriceRange,
+    filteredCars
+  } = useCarFilters();
 
-  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
-  const [selectedBrand, setSelectedBrand] = useState(searchParams.get("brand") || "");
-  const [priceRange, setPriceRange] = useState(Number(searchParams.get("price")) || 1000);
-
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (selectedBrand) params.set("brand", selectedBrand);
-    if (searchTerm) params.set("search", searchTerm);
-    if (priceRange < 1000) params.set("price", priceRange.toString());
-    router.push(`/cars?${params.toString()}`, { scroll: false });
-  }, [selectedBrand, searchTerm, priceRange, router]);
-
-  const filteredCars = carData.filter((car) => {
-    const matchesSearch = car.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesBrand = selectedBrand === "" || car.brand === selectedBrand;
-    const matchesPrice = car.price <= priceRange;
-    return matchesSearch && matchesBrand && matchesPrice;
-  });
+  const resetFilters = () => {
+    setSelectedBrand("");
+    setSearchTerm("");
+    setPriceRange(1000);
+  };
 
   return (
-    <div className="min-h-screen py-16" style={{ background: "#f8f9fa" }}>
-      <div className="container mx-auto px-4 md:px-6">
+    <div className="min-h-screen py-12" style={{ background: "#fdfdfe" }}>
+      {/* Custom Styles */}
+      <style>{`
+        .sidebar-scroll::-webkit-scrollbar { width: 0px; background: transparent; }
+        .sidebar-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        .premium-input::placeholder { color: #cbd5e1; font-weight: 500; }
+      `}</style>
 
-        {/* ── Page Header ── */}
-        <div className="mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border mb-4"
-            style={{ background: "rgba(245,158,11,0.08)", borderColor: "rgba(245,158,11,0.2)" }}>
-            <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#f59e0b" }} />
-            <span className="text-xs font-black uppercase tracking-widest" style={{ color: "#d97706" }}>Our Fleet</span>
+      <div className="container mx-auto px-6 md:px-8">
+        {/* Header */}
+        <div className="mb-12 text-center lg:text-left">
+          <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full border border-amber-200/50 mb-5 shadow-sm"
+            style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.05))" }}>
+            <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+            <span className="text-[11px] font-black uppercase tracking-[3px] text-amber-700">The Royal Collection</span>
           </div>
-          <h1 className="text-4xl font-black text-slate-900">
-            Browse <span style={{ color: "#f59e0b" }}>Premium</span> Cars
+          <h1 className="text-5xl font-black text-slate-900 tracking-tight leading-none mb-3">
+            Elite <span className="text-amber-500 italic">Fleet</span>
           </h1>
-          <p className="mt-2 text-sm text-slate-400 font-medium">Find your perfect luxury ride from our curated collection.</p>
+          <p className="text-slate-400 font-medium text-base max-w-2xl">
+            Redefining luxury travel through a curated selection of world-class automotive engineering.
+          </p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
-
-          {/* ════════════ SIDEBAR ════════════ */}
-          <aside className="w-full lg:w-[300px] shrink-0">
-            <div className="bg-white p-7 rounded-3xl shadow-lg shadow-slate-200/50 border border-slate-100 sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-
-              {/* header */}
+          {/* Sidebar */}
+          <aside className="w-full lg:w-[320px] shrink-0">
+            <div className="bg-white p-6 rounded-3xl shadow-lg border border-slate-50 sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto sidebar-scroll">
+              
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-base font-black text-slate-900 flex items-center gap-2.5 uppercase tracking-tight">
-                  <SlidersHorizontal className="h-4 w-4" style={{ color: "#f59e0b" }} />
-                  Filters
+                <h2 className="text-xl font-black text-slate-900 flex items-center gap-3 uppercase tracking-tight">
+                  <SlidersHorizontal className="h-5 w-5 text-amber-500" /> Filters
                 </h2>
-                <button
-                  onClick={() => { setSelectedBrand(""); setSearchTerm(""); setPriceRange(1000); }}
-                  className="text-[10px] font-black uppercase tracking-widest transition-colors hover:text-slate-900"
-                  style={{ color: "#d97706" }}>
-                  Reset All
+                <button 
+                  onClick={resetFilters} 
+                  className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-amber-600 transition-all"
+                >
+                  Clear All
                 </button>
               </div>
 
-              {/* ── Brand ── */}
+              {/* Category Chips */}
               <div className="mb-8">
-                <p className="text-[10px] font-black uppercase tracking-[3px] text-slate-400 mb-3">Select Brand</p>
+                <p className="text-[10px] font-black uppercase tracking-[3px] text-slate-300 mb-4">Type</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {CATEGORIES.map((cat) => (
+                    <button 
+                      key={cat.name} 
+                      className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-50 border border-transparent hover:border-amber-200 hover:bg-white transition-all text-[11px] font-black uppercase text-slate-500 hover:text-amber-600"
+                    >
+                      {cat.icon} {cat.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Brand Selection */}
+              <div className="mb-8">
+                <p className="text-[10px] font-black uppercase tracking-[3px] text-slate-300 mb-4">Brand</p>
                 <div className="flex flex-col gap-2">
-                  {BRANDS.map((brand) => {
-                    const active = selectedBrand === brand;
-                    return (
-                      <button key={brand} onClick={() => setSelectedBrand(active ? "" : brand)}
-                        className="flex items-center justify-between px-4 py-3 rounded-xl font-black text-[11px] uppercase tracking-widest transition-all duration-250 border"
-                        style={active
-                          ? { background: "#111827", borderColor: "#111827", color: "#fff", boxShadow: "0 4px 12px rgba(17,24,39,0.25)" }
-                          : { background: "#f9fafb", borderColor: "transparent", color: "#64748b" }
-                        }>
-                        {brand}
-                        {active && <div className="h-2 w-2 rounded-full" style={{ background: "#f59e0b" }} />}
-                      </button>
-                    );
-                  })}
+                  {BRANDS.map((brand) => (
+                    <button 
+                      key={brand} 
+                      onClick={() => setSelectedBrand(selectedBrand === brand ? "" : brand)}
+                      className={`flex items-center justify-between px-4 py-3 rounded-xl font-black text-xs uppercase border transition-all duration-300 ${
+                        selectedBrand === brand 
+                        ? 'bg-slate-900 border-slate-900 text-white shadow-lg' 
+                        : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50'
+                      }`}
+                    >
+                      {brand}
+                      {selectedBrand === brand && (
+                        <div className="h-2 w-2 rounded-full bg-amber-500 shadow-sm" />
+                      )}
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {/* ── Price ── */}
-              <div className="mb-8 pt-6" style={{ borderTop: "1px solid #f1f5f9" }}>
-                <div className="flex justify-between items-center mb-4">
-                  <p className="text-[10px] font-black uppercase tracking-[3px] text-slate-400">Max Price</p>
-                  <span className="text-xl font-black text-slate-900">${priceRange}</span>
+              {/* Price Range */}
+              <div className="pt-6 border-t border-slate-50">
+                <div className="flex justify-between items-end mb-5">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[3px] text-slate-300 mb-1">Price Cap</p>
+                    <span className="text-2xl font-black text-slate-900 tracking-tight">${priceRange}</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-400 pb-1">Per Day</span>
                 </div>
-
-                <style>{`
-                  .amber-slider { -webkit-appearance:none; appearance:none; width:100%; height:4px; border-radius:2px; background:#e2e8f0; outline:none; }
-                  .amber-slider::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:20px; height:20px; border-radius:50%; background:#fff; border:3px solid #f59e0b; cursor:pointer; box-shadow:0 2px 6px rgba(245,158,11,0.35); }
-                  .amber-slider::-moz-range-thumb { width:20px; height:20px; border-radius:50%; background:#fff; border:3px solid #f59e0b; cursor:pointer; box-shadow:0 2px 6px rgba(245,158,11,0.35); }
-                `}</style>
-                <input type="range" min="100" max="1000" step="50" value={priceRange}
+                <input 
+                  type="range" 
+                  min="100" 
+                  max="1000" 
+                  step="50" 
+                  value={priceRange} 
                   onChange={(e) => setPriceRange(Number(e.target.value))}
-                  className="w-full amber-slider cursor-pointer" />
-                <div className="flex justify-between mt-2">
-                  <span className="text-[10px] font-black text-slate-400">$100</span>
-                  <span className="text-[10px] font-black text-slate-400">$1000</span>
-                </div>
-              </div>
-
-              {/* ── Support ── */}
-              <div className="rounded-2xl p-5 flex items-center gap-4" style={{ background: "#111827" }}>
-                <div className="p-3 rounded-xl flex items-center justify-center" style={{ background: "#f59e0b" }}>
-                  <Phone className="h-4 w-4 text-slate-900" />
-                </div>
-                <div>
-                  <p className="text-[9px] font-black uppercase tracking-widest leading-none mb-1" style={{ color: "#f59e0b" }}>Support</p>
-                  <p className="text-sm font-black text-white leading-none">+880 123 456</p>
-                </div>
+                  className="w-full cursor-pointer accent-slate-900 h-1.5 bg-slate-100 rounded-full appearance-none" 
+                />
               </div>
             </div>
           </aside>
 
-          {/* ════════════ MAIN GRID ════════════ */}
+          {/* Main Content */}
           <div className="flex-1 space-y-8">
-
-            {/* search */}
-            <div className="relative group w-full max-w-2xl">
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-amber-500 transition-colors duration-300" />
-              <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search premium models..."
-                className="w-full pl-16 pr-6 py-5 rounded-2xl bg-white border border-slate-100 outline-none text-slate-900 text-base shadow-sm focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-300 placeholder-slate-300" />
+            {/* Search Bar */}
+            <div className="relative group w-full">
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-amber-500 transition-all duration-300" />
+              <input 
+                type="text" 
+                value={searchTerm} 
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Find your next journey..." 
+                className="w-full pl-14 pr-6 py-4 rounded-2xl bg-white border border-slate-100 shadow-md focus:shadow-lg focus:ring-0 outline-none premium-input text-base font-medium transition-all duration-300" 
+              />
             </div>
 
-            {/* ── Car Cards ── */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-              {filteredCars.map((car) => (
-                <div key={car.id}
-                  className="group bg-white rounded-3xl border border-slate-100 overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-slate-200/60"
-                  style={{ willChange: "transform" }}>
-
-                  {/* image area */}
-                  <div className="relative h-60 overflow-hidden" style={{ background: "#f1f5f9" }}>
-                    <Image src={car.image} alt={car.name} fill className="object-contain p-8 group-hover:scale-110 transition-transform duration-500 ease-out" />
-
-                    {/* brand badge */}
-                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3.5 py-1.5 rounded-full shadow-sm border border-slate-100">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-900">{car.brand}</span>
+            {/* Cars Grid */}
+            {filteredCars.length === 0 ? (
+              <div className="text-center py-32 bg-white rounded-3xl border border-dashed border-slate-200">
+                <Search className="h-12 w-12 text-slate-200 mx-auto mb-4" />
+                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">No Matches Found</h3>
+                <p className="text-slate-400 mt-2 text-sm">Refine your filters to discover our elite collection.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {filteredCars.map((car) => (
+                  <div 
+                    key={car.id} 
+                    className="group bg-white rounded-3xl border border-slate-50 overflow-hidden flex flex-col transition-all duration-500 hover:-translate-y-2 hover:shadow-xl"
+                  >
+                    {/* Image */}
+                    <div className="relative h-64 bg-gradient-to-b from-slate-50 to-white overflow-hidden">
+                      <Image 
+                        src={car.image} 
+                        alt={car.name} 
+                        fill 
+                        className="object-contain p-8 group-hover:scale-110 transition-transform duration-700" 
+                      />
+                      <div className="absolute top-4 left-4 bg-white/80 backdrop-blur-xl px-4 py-2 rounded-xl shadow-sm border border-white/50">
+                        <span className="text-[11px] font-black uppercase tracking-wider text-slate-900">
+                          {car.brand}
+                        </span>
+                      </div>
+                      {/* Hover Effect */}
+                      <div className="absolute inset-0 bg-amber-500/0 group-hover:bg-amber-500/5 transition-all duration-500" />
                     </div>
 
-                    {/* price badge */}
-                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3.5 py-1.5 rounded-full shadow-sm border border-slate-100">
-                      <span className="text-[11px] font-black text-slate-900">${car.price}<span className="text-slate-400 font-bold">/day</span></span>
-                    </div>
+                    {/* Content */}
+                    <div className="p-6 flex flex-col flex-grow">
+                      <div className="flex justify-between items-start mb-3">
+                        <h3 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
+                          {car.name}
+                        </h3>
+                        <div className="flex flex-col items-end">
+                          <span className="text-xl font-black text-amber-500">${car.price}</span>
+                          <span className="text-[9px] font-bold text-slate-300 uppercase">Per Day</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-1 mb-6">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-3 w-3 fill-amber-500 text-amber-500" />
+                        ))}
+                        <span className="text-[10px] font-black text-slate-400 ml-2 uppercase tracking-wider">
+                          Premium
+                        </span>
+                      </div>
 
-                    {/* bottom accent line on hover */}
-                    <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-left" />
+                      <Link 
+                        href={`/cars/${car.id}`} 
+                        className="relative overflow-hidden group/btn w-full text-center py-4 rounded-xl font-black uppercase tracking-[3px] text-xs text-white bg-slate-900 mt-auto transition-all duration-300 hover:bg-amber-500 hover:shadow-lg"
+                      >
+                        <span className="relative z-10">Details View</span>
+                        <div className="absolute inset-0 bg-white/10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300" />
+                      </Link>
+                    </div>
                   </div>
-
-                  {/* content */}
-                  <div className="flex flex-col flex-grow p-6">
-
-                    {/* name + stars */}
-                    <div className="mb-4">
-                      <h3 className="text-xl font-black text-slate-900 leading-tight">{car.name}</h3>
-                      <div className="flex items-center gap-0.5 mt-1.5">
-                        {[...Array(5)].map((_, i) => <Star key={i} className="h-3 w-3 fill-current" style={{ color: "#f59e0b" }} />)}
-                        <span className="text-[10px] font-black text-slate-400 ml-1.5">5.0</span>
-                      </div>
-                    </div>
-
-                    {/* specs row */}
-                    <div className="grid grid-cols-3 gap-2 py-5 mb-5 mt-auto" style={{ borderTop: "1px solid #f1f5f9", borderBottom: "1px solid #f1f5f9" }}>
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "rgba(245,158,11,0.1)" }}>
-                          <Fuel className="h-4 w-4" style={{ color: "#f59e0b" }} />
-                        </div>
-                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{car.type}</span>
-                      </div>
-                      <div className="flex flex-col items-center gap-2" style={{ borderLeft: "1px solid #f1f5f9", borderRight: "1px solid #f1f5f9" }}>
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "rgba(245,158,11,0.1)" }}>
-                          <Gauge className="h-4 w-4" style={{ color: "#f59e0b" }} />
-                        </div>
-                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{car.trans}</span>
-                      </div>
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "rgba(245,158,11,0.1)" }}>
-                          <Users className="h-4 w-4" style={{ color: "#f59e0b" }} />
-                        </div>
-                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{car.seats} Seats</span>
-                      </div>
-                    </div>
-
-                    {/* CTA button */}
-                    <Link href={`/cars/${car.id}`}
-                      className="block w-full text-center py-3.5 rounded-xl font-black uppercase tracking-[2px] text-xs text-white transition-all duration-300 active:scale-95 mt-auto"
-                      style={{ background: "linear-gradient(135deg, #111827, #1f2937)", boxShadow: "0 2px 8px rgba(17,24,39,0.2)" }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = "linear-gradient(135deg, #f59e0b, #f97316)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 4px 14px rgba(245,158,11,0.35)"; }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = "linear-gradient(135deg, #111827, #1f2937)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 2px 8px rgba(17,24,39,0.2)"; }}>
-                      Details View
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* ── Empty State ── */}
-            {filteredCars.length === 0 && (
-              <div className="text-center py-28 bg-white rounded-3xl border border-dashed border-slate-200">
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background: "rgba(245,158,11,0.08)" }}>
-                  <Search className="h-7 w-7" style={{ color: "#f59e0b" }} />
-                </div>
-                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">No Cars Found</h3>
-                <p className="text-slate-400 text-sm mt-1.5 max-w-xs mx-auto">Adjust your filters to discover more luxury vehicles in our fleet.</p>
+                ))}
               </div>
             )}
           </div>
@@ -235,12 +218,10 @@ const CarsListingContent = () => {
 export default function CarsPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f8f9fa" }}>
-        <div className="text-center">
-          <div className="text-2xl font-black text-slate-900 uppercase tracking-[4px] animate-pulse">Loading Fleet</div>
-          <div className="mt-3 flex justify-center gap-1.5">
-            {[0,1,2].map(i => <div key={i} className="w-2 h-2 rounded-full animate-bounce" style={{ background: "#f59e0b", animationDelay: `${i * 0.15}s` }} />)}
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
+          <span className="font-black text-slate-900 uppercase tracking-[4px] text-xs">Loading Fleet</span>
         </div>
       </div>
     }>

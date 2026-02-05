@@ -17,12 +17,10 @@ export default function RegisterPage() {
   
   const [passwordStrength, setPasswordStrength] = useState(0);
 
-  // FIXED: Line 20 error thik kora holo TypeScript type add kore
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const pwd = e.target.value;
     setFormData({ ...formData, password: pwd });
     
-    // Simple password strength calculator logic
     let strength = 0;
     if (pwd.length >= 8) strength++;
     if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) strength++;
@@ -46,7 +44,6 @@ export default function RegisterPage() {
   };
 
   return (
-    // PT-32 add kora hoyeche jeno Navbar theke niche thake
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/30 to-slate-100 flex items-center justify-center p-6 pt-20 pb-20 relative overflow-hidden">
       
       {/* Animated Background Elements */}

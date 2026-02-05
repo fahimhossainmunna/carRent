@@ -3,6 +3,7 @@ import { Inter, Montserrat } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
+import { StoreProvider } from "@/providers/StoreProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -29,10 +30,13 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${montserrat.variable} antialiased`}
       >
+        <StoreProvider>
+
         <Navbar/>
         <main className="pt-15"></main>
         {children}
         <Footer/>
+        </StoreProvider>
       </body>
     </html>
   );

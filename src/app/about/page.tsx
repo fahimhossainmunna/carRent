@@ -63,7 +63,6 @@ const AnimatedCounter = ({
 }) => {
   const [hasStarted, setHasStarted] = useState(false);
 
-  // Extract number from value (e.g., "200+" -> 200)
   const numericValue = parseInt(value.replace(/\D/g, ""));
   const count = useCounter(numericValue, 2000, hasStarted);
 

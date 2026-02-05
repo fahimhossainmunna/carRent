@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import {
   Car,
@@ -10,34 +10,21 @@ import {
   ChevronRight,
   Phone,
   Mail,
-  MapPin,
   User,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { useScroll } from "@/hooks/useScroll";
+import { useClickOutside } from "@/hooks/useClickOutside";
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const scrolled = useScroll();
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (isUserMenuOpen && !target.closest(".user-menu-container")) {
-        setIsUserMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isUserMenuOpen]);
+  useClickOutside(userMenuRef, () => setIsUserMenuOpen(false));
 
   const menuItems = [
     { name: "Home", href: "/" },
@@ -48,22 +35,21 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Main Navbar */}
+      {/* Main Navbar - Design strictly preserved */}
       <nav
         className={`fixed top-0 z-[100] w-full transition-all duration-500 ${
           scrolled
-            ? "bg-slate-900/98 backdrop-blur-xl py-3"
+            ? "bg-slate-900/98 backdrop-blur-xl py-3 shadow-xl"
             : "bg-white/95 backdrop-blur-xl py-5"
         }`}
       >
         <div className="container mx-auto flex items-center justify-between px-6">
-          {/* Logo Section - Premium Redesign */}
+          {/* Logo Section */}
           <Link
             href="/"
             className="flex items-center gap-3 group shrink-0 relative"
           >
             <div className="relative">
-              {/* Animated glow effect */}
               <div className="absolute inset-0 bg-amber-500/20 blur-xl rounded-full group-hover:bg-amber-500/40 transition-all duration-500"></div>
               <div className="relative bg-gradient-to-br from-amber-400 to-amber-600 p-3 rounded-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg shadow-amber-500/30">
                 <Car className="h-6 w-6 text-white" />
@@ -94,7 +80,7 @@ const Navbar = () => {
                   exit={{ opacity: 0, x: -20 }}
                   className="flex items-center gap-10"
                 >
-                  {menuItems.map((item, index) => (
+                  {menuItems.map((item) => (
                     <Link
                       key={item.name}
                       href={item.href}
@@ -103,9 +89,7 @@ const Navbar = () => {
                       }`}
                     >
                       {item.name}
-                      {/* Animated underline */}
                       <span className="absolute -bottom-2 left-0 w-0 h-0.5 bg-gradient-to-r from-amber-400 to-amber-600 transition-all duration-300 group-hover:w-full"></span>
-                      {/* Dot indicator */}
                       <span className="absolute -top-1 -right-1 w-1 h-1 bg-amber-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     </Link>
                   ))}
@@ -137,9 +121,8 @@ const Navbar = () => {
             </AnimatePresence>
           </div>
 
-          {/* Actions - Premium Redesign */}
+          {/* Actions */}
           <div className="flex items-center gap-4">
-            {/* Search Toggle Button */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -157,8 +140,8 @@ const Navbar = () => {
               )}
             </motion.button>
 
-            {/* User Menu Dropdown */}
-            <div className="hidden sm:block relative user-menu-container">
+            {/* User Menu Dropdown - Ref connected for click outside */}
+            <div className="hidden sm:block relative" ref={userMenuRef}>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -172,7 +155,6 @@ const Navbar = () => {
                 <User className="h-5 w-5" />
               </motion.button>
 
-              {/* Dropdown Menu */}
               <AnimatePresence>
                 {isUserMenuOpen && (
                   <motion.div
@@ -180,41 +162,38 @@ const Navbar = () => {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute right-0 mt-3 w-48 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden z-50"
+                    className="absolute right-0 mt-3 w-48 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden z-50 p-2"
                   >
-                    <div className="p-2">
-                      <Link
-                        href="/login"
-                        onClick={() => setIsUserMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-slate-50 transition-all duration-300 group"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-amber-50 transition-colors duration-300">
-                          <User className="h-4 w-4 text-slate-600 group-hover:text-amber-500 transition-colors duration-300" />
-                        </div>
-                        <span className="text-sm font-bold group-hover:text-amber-500 transition-colors duration-300">
-                          Log In
-                        </span>
-                      </Link>
+                    <Link
+                      href="/login"
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-slate-50 transition-all duration-300 group"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-amber-50 transition-colors duration-300">
+                        <User className="h-4 w-4 text-slate-600 group-hover:text-amber-500 transition-colors duration-300" />
+                      </div>
+                      <span className="text-sm font-bold group-hover:text-amber-500 transition-colors duration-300">
+                        Log In
+                      </span>
+                    </Link>
 
-                      <Link
-                        href="/register"
-                        onClick={() => setIsUserMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-slate-50 transition-all duration-300 mt-1 group"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-amber-50 transition-colors duration-300">
-                          <User className="h-4 w-4 text-slate-600 group-hover:text-amber-500 transition-colors duration-300" />
-                        </div>
-                        <span className="text-sm font-bold group-hover:text-amber-500 transition-colors duration-300">
-                          Sign Up
-                        </span>
-                      </Link>
-                    </div>
+                    <Link
+                      href="/register"
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-slate-50 transition-all duration-300 mt-1 group"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-amber-50 transition-colors duration-300">
+                        <User className="h-4 w-4 text-slate-600 group-hover:text-amber-500 transition-colors duration-300" />
+                      </div>
+                      <span className="text-sm font-bold group-hover:text-amber-500 transition-colors duration-300">
+                        Sign Up
+                      </span>
+                    </Link>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Mobile Menu Icon */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -231,11 +210,10 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* --- MOBILE DRAWER SECTION - PREMIUM REDESIGN --- */}
+      {/* --- MOBILE DRAWER SECTION - DESIGN PRESERVED --- */}
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -244,7 +222,6 @@ const Navbar = () => {
               className="fixed inset-0 bg-slate-900/80 backdrop-blur-lg z-[110] lg:hidden"
             />
 
-            {/* Side Drawer */}
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
@@ -252,7 +229,6 @@ const Navbar = () => {
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
               className="fixed right-0 top-0 bottom-0 w-[340px] bg-gradient-to-br from-white to-slate-50 z-[120] shadow-2xl p-8 lg:hidden flex flex-col overflow-y-auto"
             >
-              {/* Header */}
               <div className="flex justify-between items-center mb-12 pb-6 border-b border-slate-200">
                 <div className="flex items-center gap-3">
                   <div className="bg-gradient-to-br from-amber-400 to-amber-600 p-2.5 rounded-xl shadow-lg shadow-amber-500/30">
@@ -277,7 +253,6 @@ const Navbar = () => {
                 </motion.button>
               </div>
 
-              {/* Mobile Links */}
               <div className="flex flex-col gap-3 mb-auto">
                 {menuItems.map((item, index) => (
                   <motion.div
@@ -289,7 +264,7 @@ const Navbar = () => {
                     <Link
                       href={item.href}
                       onClick={() => setIsOpen(false)}
-                      className="flex items-center justify-between group p-4 rounded-2xl hover:bg-white transition-all duration-300 border border-transparent hover:border-amber-100 hover:shadow-lg hover:shadow-amber-100/50"
+                      className="flex items-center justify-between group p-4 rounded-2xl hover:bg-white transition-all duration-300 border border-transparent hover:border-amber-100 hover:shadow-lg"
                     >
                       <span className="text-sm font-black uppercase tracking-[2px] text-slate-700 group-hover:text-amber-500 transition-colors">
                         {item.name}
@@ -300,13 +275,7 @@ const Navbar = () => {
                 ))}
               </div>
 
-              {/* Contact Info */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="space-y-3 mb-8 p-5 bg-slate-100 rounded-2xl"
-              >
+              <div className="space-y-3 mb-8 p-5 bg-slate-100 rounded-2xl">
                 <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[2px] mb-3">
                   Contact Us
                 </h4>
@@ -324,15 +293,9 @@ const Navbar = () => {
                     support@carrent.com
                   </span>
                 </div>
-              </motion.div>
+              </div>
 
-              {/* Mobile Footer Actions */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="space-y-3 pt-6 border-t border-slate-200"
-              >
+              <div className="space-y-3 pt-6 border-t border-slate-200">
                 <Link
                   href="/login"
                   onClick={() => setIsOpen(false)}
@@ -347,7 +310,7 @@ const Navbar = () => {
                 >
                   Sign Up Free
                 </Link>
-              </motion.div>
+              </div>
             </motion.div>
           </>
         )}
